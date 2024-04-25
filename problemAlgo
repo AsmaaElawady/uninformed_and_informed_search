@@ -1,0 +1,9 @@
+1- start form cell 0,0
+2- add this node the the closed list
+3- go search the adjacents 
+    3.1 go left
+    3.2 go right
+    3.3 go up
+    3.4 go down
+
+    

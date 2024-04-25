@@ -43,7 +43,7 @@ move(State, Next):-
 left(State, Next); right(State, Next);
 up(State, Next); down(State, Next).
 
-left([ROW,COL], Next):-
+left([ROW,COL,C], Next):-
    CurrColor is element_at(ROW, COL, )
 
 
@@ -66,3 +66,5 @@ element_at(Row, Column, Matrix, Element) :-
 %Right invalid if(j > M)
 %Up invalid if(i < 0)
 %down invalid if(i > N)
+
+% state representaion will be [x,y,color]
