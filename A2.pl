@@ -37,19 +37,20 @@ get_board(Value) :-
 
 
 search(Open, Closed):-
-    getState(Open, Node, _), % Step 1
-    Open = [],
+    getState(Open, Node, TmpOpen), % Step 1
+    TmpOpen = [],
     % CurrentState = Goal, !, % Step 2 -> need to handle the check for the goal
-    write("Search is complete!"), nl,
-    printSolution(Closed). % -> modify the print.
+    write("Search is complete!"), nl.
+    %printSolution(Closed). % -> modify the print.
 
 
 search(Open, Closed):-
     getState(Open, CurrentNode, TmpOpen),
     getAllValidChildren(CurrentNode, TmpOpen, Closed, Children), % Step3
     addChildren(Children, TmpOpen, NewOpen), % Step 4
-    append(Closed, [CurrentNode], NewClosed), % Step 5.1
-    search(NewOpen, NewClosed, Goal). % Step 5.2
+    append(Closed, CurrentNode, NewClosed), % Step 5.1
+    printSolution(NewClosed),
+    search(NewOpen, NewClosed). % Step 5.2
 
 
 % Implementation of step 3 to get the next states
@@ -82,8 +83,8 @@ addChildren(Children, Open, NewOpen):-
 %     printSolution([Parent, GrandParent], Closed),
 %     write(State), nl.
 
-printSolution([]).
 
+printSolution([]).
 
 printSolution([H|T]):-
   write(H), nl,
@@ -108,6 +109,7 @@ left(Node, Next):-
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
   Color1 == Color2.
+%   write(Next),nl.
 
 
 right(Node, Next):-
@@ -164,7 +166,7 @@ loop(Board, End, End, _Step) :- !.
 
 % Recursive case: Print Start, then increment Start and continue.
 loop([CurrentNode|Rest], Start, End, Step) :-
-    write("done"), nl,
+     write("done"), nl,
     Start =< End,
     search([CurrentNode], []),
     Next is Start + Step,
