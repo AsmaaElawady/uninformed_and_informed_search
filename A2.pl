@@ -38,18 +38,27 @@ get_board(Value) :-
 
 search(Open, Closed):-
     getState(Open, Node, TmpOpen), % Step 1
-    TmpOpen = [],
+    Node = [],
     % CurrentState = Goal, !, % Step 2 -> need to handle the check for the goal
-    write("Search is complete!"), nl.
-    %printSolution(Closed). % -> modify the print.
+    % write("Search is complete!"), nl,
+    write(Closed).
+    % printSolution(Closed). % -> modify the print.
+    % print_cycles(Closed).    
+
+% print_cycles(Closed):-
 
 
 search(Open, Closed):-
     getState(Open, CurrentNode, TmpOpen),
-    getAllValidChildren(CurrentNode, TmpOpen, Closed, Children), % Step3
+    append(Closed, [CurrentNode], NewClosed), % Step 5.1
+    getAllValidChildren(CurrentNode, TmpOpen, NewClosed, Children), % Step3
     addChildren(Children, TmpOpen, NewOpen), % Step 4
-    append(Closed, CurrentNode, NewClosed), % Step 5.1
-    printSolution(NewClosed),
+    
+    write("current node" + CurrentNode), nl,
+    write("children" + Children), nl,
+    write("Closed" + NewClosed), nl,
+    write("Open" + NewOpen), nl,
+    
     search(NewOpen, NewClosed). % Step 5.2
 
 
@@ -60,8 +69,8 @@ getAllValidChildren(Node, Open, Closed, Children):-
 
 getNextState(Node, Open, Closed, Next):-
     move(Node, Next),
-    not(member([Next,_], Open)),
-    not(member([Next,_], Closed)).
+    not(member(Next, Open)),
+    not(member(Next, Closed)).
 
 
 % Implementation of getState and addChildren determine the search alg.
@@ -73,18 +82,8 @@ addChildren(Children, Open, NewOpen):-
     append(Open, Children, NewOpen).
 
 
-% Implementation of printSolution to print the actual solution path
-% printSolution([State, null],_):-
-%     write(State), nl.
-
-
-% printSolution([State, Parent], Closed):-
-%     member([Parent, GrandParent], Closed),
-%     printSolution([Parent, GrandParent], Closed),
-%     write(State), nl.
-
-
 printSolution([]).
+
 
 printSolution([H|T]):-
   write(H), nl,
@@ -92,9 +91,9 @@ printSolution([H|T]):-
 
 
 move(Node, Next):-
+    up(Node, Next);
     left(Node, Next);
     right(Node, Next);
-    up(Node, Next); 
     down(Node, Next).
 
 
@@ -108,6 +107,8 @@ left(Node, Next):-
   NextIndx is Indx - 1,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
+  write("left"), nl,
+  write(Node), write(" "), write(Next), write(" "), nl,
   Color1 == Color2.
 %   write(Next),nl.
 
@@ -122,7 +123,10 @@ right(Node, Next):-
   NextIndx is Indx + 1,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
+  write("right"), nl,
+  write(Node), write(" "), write(Next), write(" "), nl,
   Color1 == Color2.
+%   write(Next),nl.
 
 
 up(Node, Next):-
@@ -131,10 +135,13 @@ up(Node, Next):-
   nth0(Indx, Board, Node),
   Node = [X1, Y1, Color1],
   Indx >= M,
-  NextIndx is Indx mod M,
+  NextIndx is Indx - M,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
+  write("up"), nl,
+  write(Node), write(" "), write(Next), write(" "), nl,
   Color1 == Color2.
+%   write(Next),nl.
 
 
 down(Node, Next):-
@@ -148,7 +155,10 @@ down(Node, Next):-
   NextIndx is Indx + M,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
+  write("down"), nl,
+  write(Node), write(" "), write(Next), write(" "), nl,
   Color1 == Color2.
+%   write(Next),nl.
 
 
 % predicate which will start the search.
@@ -167,7 +177,7 @@ loop(Board, End, End, _Step) :- !.
 % Recursive case: Print Start, then increment Start and continue.
 loop([CurrentNode|Rest], Start, End, Step) :-
      write("done"), nl,
-    Start =< End,
+    Start < End,
     search([CurrentNode], []),
     Next is Start + Step,
     loop(Rest, Next, End, Step).
@@ -180,3 +190,5 @@ loop([CurrentNode|Rest], Start, End, Step) :-
 
 % board = [[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [0, 3, red], [1, 0, blue], [1, 1, yellow], [1, 2, blue], [1, 3, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], [2, 3, yellow], [3, 0, blue], [3, 1, blue], [3, 2, blue], [3, 3, yellow]]
 % start([[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [0, 3, red], [1, 0, blue], [1, 1, yellow], [1, 2, blue], [1, 3, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], [2, 3, yellow], [3, 0, blue], [3, 1, blue], [3, 2, blue], [3, 3, yellow]], 4, 4).
+% [[3,2,blue],[2,2,blue],[3,1,blue],[1,2,blue],[2,1,blue],[3,0,blue],[2,0,blue]]
+
