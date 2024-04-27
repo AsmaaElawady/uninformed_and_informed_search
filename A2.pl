@@ -38,15 +38,32 @@ get_board(Value) :-
 
 search(Open, Closed):-
     getState(Open, Node, TmpOpen), % Step 1
-    Node = [],
+    TmpOpen = [],
     % CurrentState = Goal, !, % Step 2 -> need to handle the check for the goal
     % write("Search is complete!"), nl,
     write(Closed).
-    % printSolution(Closed). % -> modify the print.
+    %printSolution(Closed). % -> modify the print.
     % print_cycles(Closed).    
 
 % print_cycles(Closed):-
 
+is_goal(Parent,[H|T]):-
+is_up(Parent,H),
+is_goal(H,[T]).
+    
+
+ 
+is_down([X,Y,_],[X2,Y2,_]):-
+    X is X2 - 1.
+
+is_up([X,Y,_],[X2,Y2,_]):-
+    X is X2 - 1.
+
+is_([X,Y,_],[X2,Y2,_]):-
+    X is X2 - 1.
+
+is_up([X,Y,_],[X2,Y2,_]):-
+    X is X2 - 1.
 
 search(Open, Closed):-
     getState(Open, CurrentNode, TmpOpen),
@@ -192,3 +209,58 @@ loop([CurrentNode|Rest], Start, End, Step) :-
 % start([[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [0, 3, red], [1, 0, blue], [1, 1, yellow], [1, 2, blue], [1, 3, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], [2, 3, yellow], [3, 0, blue], [3, 1, blue], [3, 2, blue], [3, 3, yellow]], 4, 4).
 % [[3,2,blue],[2,2,blue],[3,1,blue],[1,2,blue],[2,1,blue],[3,0,blue],[2,0,blue]]
 
+% move(Node, Next, Visited):-
+%     (up(Node, Next); down(Node, Next); left(Node, Next); right(Node, Next)),
+%     \+ member(Next, Visited).
+
+% left(Node, Next, Visited):-
+%   get_board(Board),
+%   get_n(N),
+%   nth0(Indx, Board, Node),
+%   Node = [X1, Y1, Color1],
+%   CheckIndx is Indx mod N,
+%   CheckIndx \= 0,
+%   NextIndx is Indx - 1,
+%   nth0(NextIndx, Board, Next),
+%   Next = [X2, Y2, Color2],
+%   Color1 == Color2,
+%   \+ member(Next, Visited).
+
+% right(Node, Next, Visited):-
+%   get_board(Board),
+%   get_n(N),
+%   nth0(Indx, Board, Node),
+%   Node = [X1, Y1, Color1],
+%   CheckIndx is (Indx+1) mod N,
+%   CheckIndx \= 0,
+%   NextIndx is Indx + 1,
+%   nth0(NextIndx, Board, Next),
+%   Next = [X2, Y2, Color2],
+%   Color1 == Color2,
+%   \+ member(Next, Visited).
+
+% up(Node, Next, Visited):-
+%   get_board(Board),
+%   get_n(M),
+%   nth0(Indx, Board, Node),
+%   Node = [X1, Y1, Color1],
+%   Indx >= M,
+%   NextIndx is Indx - M,
+%   nth0(NextIndx, Board, Next),
+%   Next = [X2, Y2, Color2],
+%   Color1 == Color2,
+%   \+ member(Next, Visited).
+
+% down(Node, Next, Visited):-
+%   get_board(Board),
+%   get_n(N),
+%   get_m(M),
+%   nth0(Indx, Board, Node),
+%   Node = [X1, Y1, Color1],
+%   CheckIndx is (N * M) - M,
+%   Indx =< CheckIndx,
+%   NextIndx is Indx + M,
+%   nth0(NextIndx, Board, Next),
+%   Next = [X2, Y2, Color2],
+%   Color1 == Color2,
+%   \+ member(Next, Visited).
