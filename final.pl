@@ -30,10 +30,18 @@ set_board(Value) :-
 get_board(Value) :-
     board(Value).
 
+% Define the length of an empty list as 0
+list_length([], 0).
+
+% Recursively compute the length of the list
+list_length([_|Xs], L) :-
+    list_length(Xs, N),
+    L is N + 1.
 
 
-search([X,Y,C,[H|T]], Closed):-
-    getNextState([X,Y,C,[H|T]],Next),
+
+search([X,Y,C,Path], Closed, [H|T]):-
+    getNextState([X,Y,C,Path],Next),
     Next == H,
     write([H|T]).
     %printSolution(Closed). % -> modify the print.
@@ -43,16 +51,18 @@ search([X,Y,C,[H|T]], Closed):-
 
 
 
-search(Open, Closed):-
+search(Open, Closed, Visited):-
     getState(Open, CurrentNode, TmpOpen),
     append(Closed, [CurrentNode], NewClosed), % Step 5.1
     getAllValidChildren(CurrentNode, TmpOpen, NewClosed, Children), % Step3
-    addChildren(Children, TmpOpen, NewOpen), % Step 4
+    list_length(Children ,LstLen),
+    LstLen >= 2,
+    addChildren(Children, TmpOpen, [H|T]), % Step 4
     write("current node" + CurrentNode), nl,
     write("children" + Children), nl,
     write("Closed" + NewClosed), nl,
     write("Open" + NewOpen), nl,
-    search(NewOpen, NewClosed).    % Step 5.2    
+    search(NewOpen, NewClosed,[Visited|H]).    % Step 5.2    
 
 
 
@@ -64,9 +74,11 @@ getAllValidChildren([X,Y,C,Path], Open, Closed, Children):-
 
 
 getNextState(Node, Open, Closed, Next):-
-    move(Node, Next),
+    move(Node, Next,Next2),
     not(member(Next, Open)),
-    %not(member(Next, Closed)).
+    not(member(Next, Closed)),
+    not(member(Next2, Open)),
+    not(member(Next2, Closed)).
 
 
 % Implementation of getState and addChildren determine the search alg.
@@ -86,11 +98,23 @@ printSolution([H|T]):-
   printSolution(T).
 
 
-move(Node, Next):-
-    right(Node, Next);
-     down(Node, Next);
-    left(Node, Next);
-    up(Node, Next).
+move(Node, Next1, Next2):-
+(up(Node, Next1), left(Node, Next2)).
+
+move(Node, Next1, Next2):-
+(up(Node, Next1), right(Node, Next2)).
+
+move(Node, Next1, Next2):-
+(down(Node, Next1), right(Node, Next2)).
+
+move(Node, Next, Next2):-
+(down(Node, Next1), left(Node, Next2)).
+
+% move(Node, Next):-
+%     right(Node, Next);
+%      down(Node, Next);
+%     left(Node, Next);
+%     up(Node, Next).
    
 
 
@@ -163,6 +187,7 @@ start(Board, N, M):-
   set_m(M),
   set_board(Board),
   End is N*M,
+  write(End),
   loop(Board, 1, End, 1).
 
 
@@ -175,7 +200,7 @@ loop(Board, End, End, _Step) :- !.
 loop([[X,Y,C,null]|Rest], Start, End, Step) :-
     write("done"), nl,
     Start < End,
-    search([[X,Y,C,null]], []),
+    search([[X,Y,C,null]], [],[]),
     Next is Start + Step,
     loop(Rest, Next, End, Step).
 
