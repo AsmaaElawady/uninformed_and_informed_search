@@ -1,27 +1,27 @@
 % Predicate to set the value of global variable N
-set_n(Value) :-
+set_n(Value):-
     retractall(n(_)),
     assertz(n(Value)).
 
 
 % Predicate to get the value of global variable N
-get_n(Value) :-
+get_n(Value):-
     n(Value).
 
 
 % Predicate to set the value of global variable M
-set_m(Value) :-
+set_m(Value):-
     retractall(m(_)),
     assertz(m(Value)).
 
 
 % Predicate to get the value of global variable M
-get_m(Value) :-
+get_m(Value):-
     m(Value).
 
 
 % Predicate to set the value of the list of lists
-set_board(Value) :-
+set_board(Value):-
     retractall(board(_)),
     assertz(board(Value)).
 
@@ -36,7 +36,7 @@ search(Open, Closed, Goal):-
     getBestState(Open, [CurrentState,Parent,C,H,A], _), % Step 1
     CurrentState = Goal, % Step 2
     write("Search is complete!"), nl,
-    printSolution([CurrentState,Parent,C,H,A], Closed), !.
+    printSolution([CurrentState,Parent,C,H,A], Closed),!.
 
 search(Open, Closed, Goal):-
     getBestState(Open, CurrentNode, TmpOpen),
@@ -189,5 +189,5 @@ write([State, G, H, F]), nl.
 
 
 %cost of each node
-%start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],
- %[1, 1, blue], [1, 2, red], [1, 3, red], [2, 0, red], [2, 1, red], [2, 2, red],[2, 3, yellow], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4,[0,0,red],[1,3,red]).
+% start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],
+%  [1, 1, blue], [1, 2, red], [1, 3, red], [2, 0, red], [2, 1, red], [2, 2, red],[2, 3, yellow], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4,[0,0,red],[1,3,red]).
