@@ -68,12 +68,12 @@ search(Open, Closed, CycleList):-
         addChildren(ValidChildren2, NewOpen, NewOpen2), % Step 4
         append(CycleList, [CurrentNode], NewCycleList), % Add CurrentNode to CycleList
         
-        write("Both children are not empty"),
-        write("current node" + CurrentNode), nl,
-        write("children" + Children1 + Children2), nl,
-        write("Closed" + NewClosed), nl,
-        write("Open" + NewOpen2), nl,
-        write("Cycle List" + NewCycleList), nl,
+        % write("Both children are not empty"),
+        % write("current node" + CurrentNode), nl,
+        % write("children" + Children1 + Children2), nl,
+        % write("Closed" + NewClosed), nl,
+        % write("Open" + NewOpen2), nl,
+        % write("Cycle List" + NewCycleList), nl,
         
         % Continue search with CycleList and NewClosed
         search(NewOpen2, NewClosed, NewCycleList);
