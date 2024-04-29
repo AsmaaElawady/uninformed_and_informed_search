@@ -1,3 +1,11 @@
+% G -> Cummulative
+% H -> Heuristic
+% F -> Cummulative + Heuristic
+
+% [Node, Parent, Cummulative, Heuristic, C+H].
+% Start -> [[X, Y, Color], null, 0 ,x, 0]
+
+
 % Predicate to set the value of global variable N
 set_n(Value) :-
     retractall(n(_)),
@@ -31,7 +39,6 @@ get_board(Value) :-
     board(Value).
 
 
-
 search(Open, Closed, Goal):-
     getBestState(Open, [CurrentState,Parent,C,H,A], _), % Step 1
     CurrentState = Goal, % Step 2
@@ -40,12 +47,12 @@ search(Open, Closed, Goal):-
 
 search(Open, Closed, Goal):-
     getBestState(Open, CurrentNode, TmpOpen),
-    write("CurrentNode" + CurrentNode), nl,
+    % write("CurrentNode" + CurrentNode), nl,
     getAllValidChildren(CurrentNode, TmpOpen, Closed, Goal, Children), % Step 3
     addChildren(Children, TmpOpen, NewOpen), % Step 4
     append(Closed, [CurrentNode], NewClosed), % Step 5.1
-    write("newopen"+ NewOpen),nl,write("NewClosed" + NewClosed),nl,
-    write("CurrentNode" + CurrentNode),nl,write("Children" + Children),
+    % write("newopen"+ NewOpen),nl,write("NewClosed" + NewClosed),nl,
+    % write("CurrentNode" + CurrentNode),nl,write("Children" + Children),
     search(NewOpen, NewClosed, Goal). % Step
 
 
@@ -54,12 +61,11 @@ getAllValidChildren(Node, Open, Closed, Goal, Children):-
     Children).
 
 
-% G -> Cummulative
-% H -> Heuristic
-% F -> Cummulative + Heuristic
 getNextState([State,_,G,_,_],Open,Closed,Goal,[Next,State,NewG,NewH,NewF]):-
     move(State, Next, MoveCost),
+    % write("Next" + Next), nl,
     calculateH(Next, Goal, NewH),
+    % write("NewH" + NewH),nl,
     NewG is G + MoveCost,
     NewF is NewG + NewH,
     ( not(member([Next,_,_,_,_], Open)) ; memberButBetter(Next,Open,NewF)),
@@ -70,12 +76,14 @@ getNextState([State,_,G,_,_],Open,Closed,Goal,[Next,State,NewG,NewH,NewF]):-
 addChildren(Children, Open, NewOpen):-
     append(Open, Children, NewOpen).
 
+
 getBestState(Open, BestChild, Rest):-
     findMin(Open, BestChild),
     delete(Open, BestChild, Rest).
-% Implementation of findMin in getBestState determines the search
-%alg.
-% Greedy best-first search
+
+
+% Implementation of findMin in getBestState determines the search alg.
+% Greedy best-first search.
 findMin([X], X):- !.
 
 findMin([Head|T], Min):-
@@ -91,13 +99,11 @@ memberButBetter(Next, List, NewF):-
     MinOldF > NewF.
 
 
-
 move(Node, Next, 1):-
     right(Node, Next);
     down(Node, Next);
     left(Node, Next);
     up(Node, Next).
-
 
 
 left(Node, Next):-
@@ -110,10 +116,9 @@ left(Node, Next):-
   NextIndx is Indx - 1,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
-  write("left"), nl,
-  write(Node), write(" "), write(Next), write(" "), nl,
-  Color1 == Color2,
-   write(Next),nl.
+%   write("left"), nl,
+%   write(Node), write(" "), write(Next), write(" "), nl,
+  Color1 == Color2.
 
 
 right(Node, Next):-
@@ -126,10 +131,9 @@ right(Node, Next):-
   NextIndx is Indx + 1,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
-  write("right"), nl,
-  write(Node), write(" "), write(Next), write(" "), nl,
-  Color1 == Color2,
-   write(Next),nl.
+%   write("right"), nl,
+%   write(Node), write(" "), write(Next), write(" "), nl,
+  Color1 == Color2.
 
 
 up(Node, Next):-
@@ -141,10 +145,9 @@ up(Node, Next):-
   NextIndx is Indx - M,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
-  write("up"), nl,
-  write(Node), write(" "), write(Next), write(" "), nl,
-  Color1 == Color2,
-   write(Next),nl.
+%   write("up"), nl,
+%   write(Node), write(" "), write(Next), write(" "), nl,
+  Color1 == Color2.
 
 
 down(Node, Next):-
@@ -158,16 +161,11 @@ down(Node, Next):-
   NextIndx is Indx + M,
   nth0(NextIndx, Board, Next),
   Next = [X2, Y2, Color2],
-  write("down"), nl,
-  write(Node), write(" "), write(Next), write(" "), nl,
-  Color1 == Color2,
-  write(Next),nl.
+%   write("down"), nl,
+%   write(Node), write(" "), write(Next), write(" "), nl,
+  Color1 == Color2.
 
-% [Node, Parent, Cummulative, Heuristic, C+H].
 
-% Start -> [[X, Y, Color], null, 0 ,x, 0]
-
-% start -> [X, Y, Color]
 start(Board, N, M, Start, Goal):-
   set_n(N),
   set_m(M),
@@ -175,16 +173,15 @@ start(Board, N, M, Start, Goal):-
   search([Start], [], Goal).
   
 
-calculateH(State,Goal,H):-
-    State = [Node,_,_,_,_],
-    Goal  = [Node2,_,_,_,_],
-    Node  = [X1, Y1, Color1],
-    Node2 = [X2, Y2, Color2],
+calculateH(State, Goal, H):-
+    State  = [X1, Y1, Color1],
+    Goal = [X2, Y2, Color2],
     H is (X2 - X1) + (Y2 - Y1).
 
 
 printSolution([State, null, G, H, F],_):-
     write([State, G, H, F]), nl.
+
 
 printSolution([State, Parent, G, H, F], Closed):-
     member([Parent, GrandParent, PrevG, Ph, Pf], Closed),
@@ -192,7 +189,6 @@ printSolution([State, Parent, G, H, F], Closed):-
     write([State, G, H, F]), nl.
 
 
-
-
-%cost of each node
-% start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],[1, 1, blue], [1, 2, red], [1, 3, red], [2, 0, red], [2, 1, red], [2, 2, red],[2, 3, yellow], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4, [[0, 0, red], null, 0 ,x, 0],[1,3,red]).
+% no path -> start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],[1, 1, blue], [1, 2, red], [1, 3, red], [2, 0, red], [2, 1, blue], [2, 2, red],[2, 3, yellow], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4, [[0, 0, red], null, 0 ,x, 0], [1,3,red]).
+% straight path -> start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],[1, 1, blue], [1, 2, blue], [1, 3, blue], [2, 0, red], [2, 1, red], [2, 2, red],[2, 3, yellow], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4, [[1, 1, blue], null, 0 ,x, 0], [1,3,blue]).
+% two pathes-> start([[0, 0, red], [0, 1, red], [0, 2, yellow], [0, 3, yellow], [1, 0, red],[1, 1, blue], [1, 2, blue], [1, 3, blue], [2, 0, red], [2, 1, blue], [2, 2, blue],[2, 3, blue], [3, 0, blue], [3, 1, red], [3, 2, blue], [3, 3, yellow]], 4, 4, [[1, 1, blue], null, 0 ,x, 0], [2,3,blue]).
