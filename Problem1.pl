@@ -1,7 +1,7 @@
 % % [[yellow, yellow, yellow, red], [blue, yellow, blue, yellow], [blue, blue, blue, yellow], [blue, blue, blue, yellow]]
 
-% To be handled: handle the goal in the start loop
-
+% detects if no cycle
+% if two or more cycles exist print all
 
 % Predicate to set the value of global variable N
 set_n(Value) :-
@@ -39,6 +39,7 @@ get_board(Value) :-
 search(Open, Closed, CycleList):-
     getState(Open, Node, TmpOpen), % Step 1
     TmpOpen = [],
+    % Open = [],
     % getAllValidChildren(Node, TmpOpen, NewClosed, Children1, Children2), % Step3
     % Children1 = [],
     % Children2 = [],
@@ -46,8 +47,8 @@ search(Open, Closed, CycleList):-
     % Length >= 4,
     % CurrentState = Goal, !, % Step 2 -> need to handle the check for the goal
     % write("Search is complete!"), nl,
-    write(Closed).
-    %printSolution(Closed). % -> modify the print.
+    write([Node|CycleList]).
+    % printSolution(Closed). % -> modify the print.
     % print_cycles(Closed).    
 
 % print_cycles(Closed):-
@@ -58,8 +59,29 @@ search(Open, Closed, CycleList):-
 search(Open, Closed, CycleList):-
     getState(Open, CurrentNode, TmpOpen),
     append(Closed, [CurrentNode], NewClosed), % Step 5.1
-    getAllValidChildren(CurrentNode, TmpOpen, NewClosed, Children), % Step3
-    addChildren(Children, TmpOpen, NewOpen), % Step 4
+    getAllValidChildren(CurrentNode, TmpOpen, NewClosed, Children1, Children2), % Step3
+    
+    % Check if both Children1 and Children2 are not empty
+    (Children1 \= [], Children2 \= [] ->
+        checkNextState(Children1, Open, NewClosed, ValidChildren1),
+        addChildren(ValidChildren1, TmpOpen, NewOpen), % Step 4
+        checkNextState(Children2, NewOpen, NewClosed, ValidChildren2),
+        addChildren(ValidChildren2, NewOpen, NewOpen2), % Step 4
+        append(CycleList, [CurrentNode], NewCycleList), % Add CurrentNode to CycleList
+        
+        write("Both children are not empty"),
+        write("current node" + CurrentNode), nl,
+        write("children" + Children1 + Children2), nl,
+        write("Closed" + NewClosed), nl,
+        write("Open" + NewOpen2), nl,
+        write("Cycle List" + NewCycleList), nl,
+        
+        % Continue search with CycleList and NewClosed
+        search(NewOpen2, NewClosed, NewCycleList);
+    % If at least one of Children1 or Children2 is empty
+    append(Closed, [CurrentNode], UpdatedClosed),
+    addChildren(Children1, TmpOpen, NewOpen), % Step 4
+    addChildren(Children2, NewOpen, NewOpen2), % Step 4
     
     write("current node" + CurrentNode), nl,
     write("children" + Children1 + Children2), nl,
@@ -254,62 +276,7 @@ loop([CurrentNode|Rest], Start, End, Step) :-
 % board = [[X, Y, Color], [X, Y, Color], [X, Y, Color], [X, Y, Color], [X, Y, Color], [X, Y, Color], ....]
 % goal -> when the open list is empty.
 
-% board = [[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [1, 0, yellow], [1, 1, yellow], [1, 2, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], ]
+% board = [[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [0, 3, red], [1, 0, blue], [1, 1, yellow], [1, 2, blue], [1, 3, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], [2, 3, yellow], [3, 0, blue], [3, 1, blue], [3, 2, blue], [3, 3, yellow]]
 % start([[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [0, 3, red], [1, 0, blue], [1, 1, yellow], [1, 2, blue], [1, 3, yellow], [2, 0, blue], [2, 1, blue], [2, 2, blue], [2, 3, yellow], [3, 0, blue], [3, 1, blue], [3, 2, blue], [3, 3, yellow]], 4, 4).
-% [[3,2,blue],[2,2,blue],[3,1,blue],[1,2,blue],[2,1,blue],[3,0,blue],[2,0,blue]]
 
-% move(Node, Next, Visited):-
-%     (up(Node, Next); down(Node, Next); left(Node, Next); right(Node, Next)),
-%     \+ member(Next, Visited).
-
-% left(Node, Next, Visited):-
-%   get_board(Board),
-%   get_n(N),
-%   nth0(Indx, Board, Node),
-%   Node = [X1, Y1, Color1],
-%   CheckIndx is Indx mod N,
-%   CheckIndx \= 0,
-%   NextIndx is Indx - 1,
-%   nth0(NextIndx, Board, Next),
-%   Next = [X2, Y2, Color2],
-%   Color1 == Color2,
-%   \+ member(Next, Visited).
-
-% right(Node, Next, Visited):-
-%   get_board(Board),
-%   get_n(N),
-%   nth0(Indx, Board, Node),
-%   Node = [X1, Y1, Color1],
-%   CheckIndx is (Indx+1) mod N,
-%   CheckIndx \= 0,
-%   NextIndx is Indx + 1,
-%   nth0(NextIndx, Board, Next),
-%   Next = [X2, Y2, Color2],
-%   Color1 == Color2,
-%   \+ member(Next, Visited).
-
-% up(Node, Next, Visited):-
-%   get_board(Board),
-%   get_n(M),
-%   nth0(Indx, Board, Node),
-%   Node = [X1, Y1, Color1],
-%   Indx >= M,
-%   NextIndx is Indx - M,
-%   nth0(NextIndx, Board, Next),
-%   Next = [X2, Y2, Color2],
-%   Color1 == Color2,
-%   \+ member(Next, Visited).
-
-% down(Node, Next, Visited):-
-%   get_board(Board),
-%   get_n(N),
-%   get_m(M),
-%   nth0(Indx, Board, Node),
-%   Node = [X1, Y1, Color1],
-%   CheckIndx is (N * M) - M,
-%   Indx =< CheckIndx,
-%   NextIndx is Indx + M,
-%   nth0(NextIndx, Board, Next),
-%   Next = [X2, Y2, Color2],
-%   Color1 == Color2,
-%   \+ member(Next, Visited).
+% start([[0, 0, yellow], [0, 1, yellow], [0, 2, yellow], [1, 0, blue], [1, 1, blue], [1, 2, red], [2, 0, blue], [2, 1, blue], [2, 2, red]], 3, 3).
